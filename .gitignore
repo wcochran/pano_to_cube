@@ -2,3 +2,6 @@
 *.aux
 *.log
 *.synctex.gz
+crop.*
+testppm
+pano.ppm
