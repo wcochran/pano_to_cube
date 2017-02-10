@@ -1,0 +1,89 @@
+\documentclass[11pt, oneside]{article}   	% use "amsart" instead of "article" for AMSLaTeX format
+\usepackage{fullpage}
+\usepackage{graphicx}
+\usepackage{amssymb}
+
+\title{Brief Article}
+\author{The Author}
+%\date{}							% Activate to display a given date or no date
+
+\begin{document}
+%\maketitle
+%\section{}
+%\subsection{}
+
+\begin{center}
+\includegraphics[width=0.6\textwidth]{cube_cylinder} 
+\end{center}   
+   
+Given the cylinder $x^2 + y^2 = 1$ inscribed inside a $2 \times 2 \times 2$ cube
+centered at the origin, we can project the cylindrical panorama onto the coresponding
+four faces of the cube as follows.
+For every pixel in the output image we cast a ray from the cube's center at $(0,0,0)$
+through the corresponding point on one of the cube's faces and determine where that
+ray intersects the cylinder. We then map this point on the cylinder to the corresponding
+point in the input image and (bilinearly) sample the input image at the point. 
+The resulting pixel color is assigned to the current output pixel.
+
+We parameterize the ray emanating from 
+the cube's center $(0,0,0)$ through a point $(u,v,w)$ on a face of the cube as
+\begin{equation}
+  \mathbf{r}(t) = (0,0,0) + t\cdot(u,v,w). \label{eq:r}
+\end{equation}
+This ray intersects the cylinder where
+\begin{equation}
+  (ut)^2 + (vt)^2 = 1.
+\end{equation}
+Solving we get $t = 1/\sqrt{u^2 + v^2},$ which we plug back into Equation~\ref{eq:r} and
+get the cylindrical point
+\begin{equation}
+  \mathbf{p} = (x,y,z) = \frac{(u,v,w)}{\sqrt{u^2 + v^2}}.
+\end{equation}
+In cylindrical coordinates we have
+\begin{eqnarray}
+\mathbf{p} = \left(\theta, z\right), \ \ \ 
+  \theta = \mbox{atan2}\left(y,x\right).
+\end{eqnarray}
+The resulting pixel coordinate in the input image is
+\begin{equation}
+(r,c) = \left(\frac{H}{2}\left(z + 1\right),\ \frac{W}{2\pi}\cdot(\theta + \pi)\right).
+\end{equation}
+
+
+
+
+\begin{verbatim}
+for row = 0 .. outImage.H-1 {
+    for col = 0 .. outImage.W-1 {
+       s = 4.0*col/outImage.W
+       face = floor(s)  // face = 0,1,2,3
+       f = s - face     // f = frac(s)
+       if face == 0 {   // (u,v,w) = point on cube
+           u = 1
+           v = 2*f - 1
+       } else if face == 1 {
+           u = 1 - 2*f
+           v = 1
+       } else if face == 2 {
+           u = -1
+           v = 1 - 2*f
+       } else {
+           u = 2*f - 1
+           v = -1
+       }
+       w = 2.0*row/outImage.H - 1
+       (x,y,z) = (u,v,w)/sqrt(u*u + v*v) // project onto cylinder
+       theta = atan2(y,x)                // convert to cyl. coords
+       r = inImage.H*(z + 1)/2.0         // map to input pixel
+       c = inImage.W*(theta + pi)/(2*pi)
+       outImage(row,col) = inImage.sample(r,c)
+     }
+}
+\end{verbatim}
+
+
+%\begin{tabbing}
+%\end{tabbing}
+
+
+\end{document}  
