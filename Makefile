@@ -4,7 +4,7 @@ ALL=testppm
 
 all: $(ALL)
 
-JUNK=*.o *~ *.dSYM pano.ppm
+JUNK=*.o *~ *.dSYM pano.ppm crop.* rot.*
 
 clean:
 	-rm -rf $(JUNK)
@@ -17,4 +17,5 @@ testppm: PPM.cpp PPM.h pano.jpg
 	convert pano.jpg pano.ppm
 	./testppm
 	convert crop.ppm crop.jpg
+	convert rot.ppm rot.jpg
 

@@ -26,7 +26,7 @@ struct PPM {
     return &pixels[3*(r*W + c)];
   }
   void write(const std::string& fname); // throws BogusPPM
-  // XXX void bilerp(float r, float c, float pix[3]) const;
+  void bilerp(float r, float c, float pix[3]) const;
 };
 
 #endif // PPM_H
