@@ -9,15 +9,15 @@
 
 \begin{document}
 %\maketitle
-%\section{}
-%\subsection{}
+
+\section{Mapping cylinder to 4 sides of cube}   
 
 \begin{center}
 \includegraphics[width=0.6\textwidth]{cube_cylinder} 
-\end{center}   
+\end{center}      
    
 Given the cylinder $x^2 + y^2 = 1$ inscribed inside a $2 \times 2 \times 2$ cube
-centered at the origin, we can project the cylindrical panorama onto the coresponding
+centered at the origin, we can project the cylindrical panorama onto the corresponding
 four faces of the cube as follows.
 For every pixel in the output image we cast a ray from the cube's center at $(0,0,0)$
 through the corresponding point on one of the cube's faces and determine where that
@@ -37,7 +37,7 @@ This ray intersects the cylinder where
 Solving we get $t = 1/\sqrt{u^2 + v^2},$ which we plug back into Equation~\ref{eq:r} and
 get the cylindrical point
 \begin{equation}
-  \mathbf{p} = (x,y,z) = \frac{(u,v,w)}{\sqrt{u^2 + v^2}}.
+  \mathbf{p} = (x,y,z) = \frac{(u,v,w)}{\sqrt{u^2 + v^2}}. \label{eq:p-cyl}
 \end{equation}
 In cylindrical coordinates we have
 \begin{eqnarray}
@@ -93,9 +93,68 @@ for row = 0 .. outImage.H-1 {
 }
 \end{verbatim}
 
+\section{Mapping sphere to 6 sides of cube}  
 
-%\begin{tabbing}
-%\end{tabbing}
+\begin{center}
+\includegraphics[width=0.6\textwidth]{cube_sphere} 
+\end{center}      
+
+Given the sphere $x^2 + y^2 + z^2= 1$ inscribed inside a $2 \times 2 \times 2$ cube
+centered at the origin, we can project the spherical panorama onto the corresponding
+four faces of the cube as follows.
+For every pixel in the output image we cast a ray from the cube's center at $(0,0,0)$
+through the corresponding point on one of the cube's faces and determine where that
+ray intersects the sphere. We then map this point on the sphere to the corresponding
+point in the input image and (bilinearly) sample the input image at the point. 
+The resulting pixel color is assigned to the current output pixel.
+
+We parameterize the ray emanating from 
+the cube's center $(0,0,0)$ through a point $(u,v,w)$ on a face of the cube 
+and find where it intersects the unit sphere. We use the mapping defined at
+\begin{verbatim}
+http://mathproofs.blogspot.com/2005/07/mapping-cube-to-sphere.html
+\end{verbatim}
+yielding
+\begin{eqnarray}
+x &=& u\sqrt{1 - \frac{v^2}{2} - \frac{w^2}{2} + \frac{v^2 w^2}{3}}, \\
+y &=& v\sqrt{1 - \frac{w^2}{2} - \frac{u^2}{2} + \frac{w^2 u^2}{3}}, \\
+z &=& w\sqrt{1 - \frac{u^2}{2} - \frac{v^2}{2} + \frac{u^2 v^2}{3}}.
+\end{eqnarray}
+We convert $(x,y,z)$ to the spherical coordinate $(\theta, \phi)$ where
+the azimuthal angle is
+\begin{equation}
+\theta = \mbox{atan2}\left(y,x\right)
+\end{equation}
+and the elevation angle is
+\begin{equation}
+\phi = \mbox{atan2}\left(\sqrt{x^2+y^2},\ z\right).
+\end{equation}
+
+\pagebreak
+
+We divvy up the output image into $3 \times 4 = 12$ squares where only 6 of the
+squares actually map to the actual faces of the cube:
+\begin{center}
+\includegraphics[width=0.6\textwidth]{cube-coords} 
+\end{center}      
+We pick $(u,v,w)$ coordinates for the unused corners so that the image has a toroidal topology.
+
+\begin{verbatim}
+for row = 0 .. outImage.H-1 {
+    for col = 0 .. outImage.W-1 {
+       a = 4.0*col/outImage.W
+       b = 3.0*row/outImage.H
+       (i,j) = (floor(a),floor(b))            // map to one of 12 squares
+       (s,t) = (a - i, b - j)                 // uvw interpolation values
+       (u,v,w) = bilerp(corners[j][i]), s,t)  // get cube coords w/in square
+       (x,y,z) = cubeToSphereCoords(u,v,w)   
+       (theta,phi) = cartesianToSpherical(x,y,z)
+       r = theta*inImage.W/(2*pi)
+       c = (phi + pi/2)*inImage.H/pi
+       outImage(row,col) = inImage.sample(r,c)
+     }
+}
+\end{verbatim}
 
 
 \end{document}  

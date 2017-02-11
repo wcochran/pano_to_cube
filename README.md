@@ -33,8 +33,8 @@ pano.jpg .............. Example panorama image
 pano2cube.cpp ......... Main application source
 pano_to_cube.pdf ...... Documentation
 pano_to_cube.tex ...... Documentation LaTeX source
-cube_cylinder.graffle . Source for figure in docs.
-cube_cylinder.pdf ..... Figure included in docs.
+*.graffle ............. OmniGraffle Sources for figure in docs.
+*.pdf ................. Figures included in docs.
 ```
 
 ## LICENSE
