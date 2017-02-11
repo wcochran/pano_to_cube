@@ -6,3 +6,6 @@ crop.*
 testppm
 pano.ppm
 rot.*
+*.o
+cube.*
+pano2cube

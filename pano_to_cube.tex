@@ -42,11 +42,21 @@ get the cylindrical point
 In cylindrical coordinates we have
 \begin{eqnarray}
 \mathbf{p} = \left(\theta, z\right), \ \ \ 
-  \theta = \mbox{atan2}\left(y,x\right).
+  \theta = \mbox{atan2}\left(y,x\right) + \pi/4. \label{eq:theta}
 \end{eqnarray}
+We added $\pi/4$ to $\theta$ so that the left edge of the image corresponds to
+the left edge of the cube's $x = 1$ face (instead of the middle of the face);
+Then we adjust for the appropriate image ``wrap-around:''
+\begin{equation}
+\theta' = \left\{\begin{array}{ll}
+  \theta        & \theta \geq 0 \\
+  \theta + 2\pi & \theta < 0
+  \end{array}\right.
+\end{equation}
+Now the left edge of the input image corresponds to the left edge of the output image.
 The resulting pixel coordinate in the input image is
 \begin{equation}
-(r,c) = \left(\frac{H}{2}\left(z + 1\right),\ \frac{W}{2\pi}\cdot(\theta + \pi)\right).
+(r,c) = \left(\frac{H}{2}\left(z + 1\right),\ \frac{W}{2\pi}\cdot \theta'\right).
 \end{equation}
 
 
@@ -73,9 +83,11 @@ for row = 0 .. outImage.H-1 {
        }
        w = 2.0*row/outImage.H - 1
        (x,y,z) = (u,v,w)/sqrt(u*u + v*v) // project onto cylinder
-       theta = atan2(y,x)                // convert to cyl. coords
+       theta = atan2(y,x) + pi/4;        // cyl. coords, -3pi/4 <= theta <= 5pi/4
+       if theta < 0                      // map to [0,2*pi)
+           theta += 2*pi
        r = inImage.H*(z + 1)/2.0         // map to input pixel
-       c = inImage.W*(theta + pi)/(2*pi)
+       c = imImage.W*theta/(2*pi)
        outImage(row,col) = inImage.sample(r,c)
      }
 }
